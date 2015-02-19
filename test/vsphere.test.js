@@ -1,3 +1,4 @@
+"use strict";
 /*
   vsphere-soap.test.js
 
@@ -91,12 +92,10 @@ describe('Client tests - query commands:', function(){
         done();
       } else if( result.returnval.objects.length ) {
         // more than one vm returned
-        console.log(util.inspect(result.returnval, {depth: null}));
         expect(result.returnval.objects[1].obj.attributes.type).to.equal('VirtualMachine');
         expect(result.returnval.objects[1].propSet).to.exist();
         done();
       } else if( result.returnval.objects ) {
-        console.log(util.inspect(result.returnval, {depth: null}));
         expect(result.returnval.objects.obj.attributes.type).to.equal('VirtualMachine');
         expect(result.returnval.objects.propSet).to.exist();
         done();
