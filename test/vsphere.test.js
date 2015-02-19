@@ -2,7 +2,7 @@
 /*
   vsphere-soap.test.js
 
-  tests for the vCenterConnectionInstance class
+  tests for the node-vsphere module
 */ 
 
 var Code = require('code');
@@ -43,7 +43,6 @@ describe('Client tests - query commands:', function(){
     });
   });
 
-
   it('can get ManagedObjectReferences in rootFolder container by type (Datacenter)', {timeout: 20000}, function(done){
     var rootFolder = vc.serviceContent.rootFolder;
     vc.getMORefsInContainerByType( rootFolder, 'Datacenter')
@@ -83,7 +82,7 @@ describe('Client tests - query commands:', function(){
     });
   });
 
-  it('can obtain the names of all Virtual Machines', {timeout: 20000}, function(done){
+  it('can obtain the names of all Virtual Machines using getMORefsInContainerByTypeAndPropertyArray', {timeout: 20000}, function(done){
     var rootFolder = vc.serviceContent.rootFolder;
     vc.getMORefsInContainerByTypeAndPropertyArray( rootFolder, 'VirtualMachine', ['name'])
     .once('result', function(result) {
