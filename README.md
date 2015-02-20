@@ -53,13 +53,33 @@ $ npm install vsphere --save
 
 ### Available methods:
 
+  There are examples here for now, until more formal documentation is put together
+
     var vcCmd = vc.runCommand( commandToRun, arguments );
     vcCmd.once('result', function( result, raw, soapHeader) {
       // handle results
     });
     vcCmd.once('error', function( err) {
       // handle errors
-    });    
+    });
+
+    var rootFolder = vc.serviceContent.rootFolder;
+
+    vc.getMORefsInContainerByType( rootFolder, 'VirtualMachine')
+
+    vc.getMORefsInContainerByTypeAndPropertyArray( rootFolder, 'VirtualMachine', ['name', 'config'])
+
+    vc.getVMinContainerPowerState( rootFolder )
+    .once('result', function( result) {
+      /*
+      result = [{ obj: { attributes: { type: 'VirtualMachine' }, '$value': '4' },
+                name: 'testvm-win',
+                powerState: 'poweredOff' }, ...]
+      */
+    });
+    .once('error', function( err) {
+      // handle errors
+    });
 
 #### Events
   - result = emits when session authenticated with server
