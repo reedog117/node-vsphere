@@ -107,18 +107,35 @@ describe('Client tests - query commands:', function(){
     });
   });
 });
-/*
+
 describe('Client tests - VM operations:', function(){
 
+  it('can obtain information about VM power state', {timeout: 5000}, function(done){
+    var rootFolder = vc.serviceContent.rootFolder;
+    vc.getVMinContainerPowerState( rootFolder )
+    .once('result', function(result) {
+      expect(result).to.be.an.array();
+      if(result.length > 0) {
+        expect(result[0].obj.attributes.type).to.equal('VirtualMachine');
+        expect( parseInt(result[0].obj['$value']) , 'vmId').to.be.a.number();
+        expect(result[0].name, 'VM Name').to.exist();
+        expect(result[0].name, 'VM Name').to.be.a.string();
+        expect(result[0].powerState, 'VM power state').to.exist();
+        expect(result[0].powerState, 'VM power state').to.be.a.string();
+      }
+      done();
+    })
+    .once('error', function(err){
+      //catch err;
+      console.error(err);
+    });
+  });
+/*
   it('creates a VM', {timeout: 5000}, function(done){
 
   });
 
   it('powers on a VM', {timeout: 5000}, function(done){
-
-  });
-
-  it('can obtain information about a VM\'s status', {timeout: 5000}, function(done){
 
   });
 
@@ -133,8 +150,8 @@ describe('Client tests - VM operations:', function(){
   it('deletes a VM', {timeout: 5000}, function(done){
 
   });
-
-});
 */
+});
+
 
 
