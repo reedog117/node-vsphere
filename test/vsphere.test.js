@@ -29,17 +29,22 @@ describe('Client object initialization:', function(){
       expect(vc.serviceContent).to.exist();
       done();
     });
+    vc.once('error', function(err) {
+      console.error(err);
+    });
   });
 });
 
 describe('Client tests - query commands:', function(){
 
   it('retrieves current time', {timeout: 5000}, function(done){
-
     vc.runCommand('CurrentTime', { _this: 'ServiceInstance'} )
       .once('result', function(result){
         expect(result.returnval).to.be.a.date();
         done();
+      })
+      .once('error', function(err) {
+        console.error(err);
     });
   });
 
@@ -130,15 +135,12 @@ describe('Client tests - VM operations:', function(){
       console.error(err);
     });
   });
-/*
-  it('creates a VM', {timeout: 5000}, function(done){
 
-  });
 
   it('powers on a VM', {timeout: 5000}, function(done){
-
+    done();
   });
-
+/*
   it('powers off a VM', {timeout: 5000}, function(done){
 
   });
