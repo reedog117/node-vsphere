@@ -10,20 +10,22 @@ var Lab = require('lab');
 var util = require('util');
 var lab = exports.lab = Lab.script();
 var Vsphere = require('../lib/client');
-var TestCreds = require('../config-test.js').vCenterTestCreds
+var TestCreds = require('../config-test.js').vCenterTestCreds;
+var TestVars = require('../config-test.js').vCenterTestVars;
 var _ = require('lodash');
 
 
 var describe = lab.describe;
 var it = lab.it;
 var before = lab.before;
+var beforeEach = lab.beforeEach;
 var after = lab.after;
 var expect = Code.expect;
 
 var vc = new Vsphere.Client(TestCreds.vCenterIP, TestCreds.vCenterUser, TestCreds.vCenterPassword, false);
 
 describe('Client object initialization:', function(){
-  it('provides a successful login', {timeout: 5000}, function(done) {
+  it('provides a successful login', {timeout: 20000}, function(done) {
     expect(vc).to.exist();
     vc.once('ready', function() {
       expect(vc.serviceContent).to.exist();
@@ -113,7 +115,10 @@ describe('Client tests - query commands:', function(){
   });
 });
 
-describe('Client tests - VM operations:', function(){
+describe('Client tests - VM power operations:', function(){
+
+  var testVMLinuxPowerOn = false;
+  var testVMWindowsPowerOn = false;
 
   it('can obtain information about VM power state', {timeout: 5000}, function(done){
     var rootFolder = vc.serviceContent.rootFolder;
@@ -132,27 +137,136 @@ describe('Client tests - VM operations:', function(){
     })
     .once('error', function(err){
       //catch err;
-      console.error(err);
+      console.error(util.inspect(err, {depth: null}));
     });
   });
 
+  it('powers on and off a VM (by name)', {timeout: 60000}, function(done){
 
-  it('powers on a VM', {timeout: 5000}, function(done){
-    done();
+    // turn off all test vms before running test
+    vc.powerOpVMByName( _.values( TestVars.testVMs), 'powerOff')
+    .once('result', runTest)
+    .once('error', runTest);
+
+    // run test
+    function runTest() {
+      // uses a random VM in testVMs
+      vc.powerOpVMByName( _.sample(TestVars.testVMs), 'powerOn')
+      .once('result', function(powerOnResult) {
+
+        // ensure VM PowerOn task successfully fired
+        expect(powerOnResult[0].result['$value']).to.be.equal('success');
+
+        // get the Virtual Machine ManagedObjectReference
+        var vmObj = powerOnResult[0].obj;
+
+        vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOn')
+        .once('result', function(result) {
+
+          // verify VM is powered on
+          expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
+
+          vc.powerOpVMByMORef( vmObj, 'powerOff')
+          .once('result', function(powerOffResult) {
+
+            // ensure VM PowerOff task successfully fired
+            expect(powerOffResult[0].result['$value']).to.be.equal('success');
+
+            vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOff')
+            .once('result', function(result) {
+
+              // verify VM is powered off
+              expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOff');
+              done();
+
+            })
+            .once('error', function(err) {
+            console.error(err);
+            });         
+          })
+          .once('error', function(err) {
+            console.error(err);
+          });
+        })
+        .once('error', function(err) {
+          console.error(err);
+        });               
+
+      })
+      .once('error', function(err) {
+        console.error(err);
+      });
+    }
   });
-/*
-  it('powers off a VM', {timeout: 5000}, function(done){
 
+  it('powers on and off multiple VMs (by array of names)', {timeout: 120000}, function(done){
+
+    // turn off all test VMs
+
+    vc.powerOpVMByName( _.values( TestVars.testVMs), 'powerOff')
+    .once('result', runTest)
+    .once('error', runTest);
+
+    // now run test
+
+    function runTest() {
+
+      var allTestVMNames = _.values( TestVars.testVMs);
+      var numProcessed = 0;
+
+      vc.powerOpVMByName( _.values( TestVars.testVMs), 'powerOn')
+      .once('result', function(powerOnResult) {
+
+        // check that all submitted PowerOn tasks have successfully fired
+        _.forEach( powerOnResult, function(result) {
+          expect(result.result['$value']).to.be.equal('success');
+        });
+
+        var vmObjArray = _.pluck( powerOnResult, 'obj');
+        // wait for them all to be powered on
+        _.forEach(vmObjArray, function(vmObj) {
+          vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOn')
+          .once('result', function(result) {
+
+            // verify all test VMs are powered on
+            expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
+
+            vc.powerOpVMByMORef( vmObj, 'powerOff')
+            .once('result', function(powerOffResult) {
+
+              // verify that all submitted PowerOff tasks have successfully fired
+              expect(powerOffResult[0].result['$value']).to.be.equal('success');
+
+              vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOff')
+              .once('result', function(result) {
+
+                // verify all test VMs are powered off
+                expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOff');
+                numProcessed++;
+                if(numProcessed == allTestVMNames.length) {
+                  done();
+                }
+              })
+              .once('error', function(err) {
+              console.error(err);
+              });         
+            })
+            .once('error', function(err) {
+              console.error(err);
+            });
+          })
+          .once('error', function(err) {
+            console.error(err);
+          });               
+        });
+
+      })
+      .once('error', function(err) {
+        console.error(err);
+      });
+    }
   });
 
-  it('changes a VM number of CPUs', {timeout: 5000}, function(done){
-
-  });
-
-  it('deletes a VM', {timeout: 5000}, function(done){
-
-  });
-*/
 });
 
 

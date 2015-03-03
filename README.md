@@ -81,6 +81,62 @@ $ npm install vsphere --save
       // handle errors
     });
 
+    vc.powerOpVMByName( vmName, powerOp)
+    /*
+    vmName can be a string (for a single VM) or an array of strings (for multiple VMs)
+    powerOp is one of ['powerOn', 'powerOff', 'reset', 'standby', 'shutdown', 'reboot', 'suspend']
+    */
+
+    vc.waitForValues( MORef, filterProps, endWaitProps, expectedVals)
+    /*
+    emits result when the specified properties of a ManagedObjectReference 
+    MORef = ManagedObject to monitor
+    filterProps = properties to filter/retrieve from MORef
+    endWaitProps = property to monitor
+    expectedVals = values of property to monitor (endWaitProps) that will trigger command to emit result
+    */
+
+    /* usage example for powering on and off a VMa VM */
+    vc.powerOpVMByName( _.sample(TestVars.testVMs), 'powerOn')
+      .once('result', function(powerOnResult) {
+        // ensure VM PowerOn task successfully fired
+        expect(powerOnResult[0].result['$value']).to.be.equal('success');
+        // get the Virtual Machine ManagedObjectReference
+        var vmObj = powerOnResult[0].obj;
+        vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOn')
+        .once('result', function(result) {
+          // verify VM is powered on
+          expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
+
+          // fire powerOff command
+          vc.powerOpVMByMORef( vmObj, 'powerOff')
+          .once('result', function(powerOffResult) {
+
+            // ensure VM PowerOff task successfully fired
+            expect(powerOffResult[0].result['$value']).to.be.equal('success');
+
+            vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOff')
+            .once('result', function(result) {
+              // verify VM is powered off
+              expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOff');
+              done();
+            })
+            .once('error', function(err) {
+            console.error(err);
+            });         
+          })
+          .once('error', function(err) {
+            console.error(err);
+          });
+        })
+        .once('error', function(err) {
+          console.error(err);
+        });
+      })
+      .once('error', function(err) {
+        console.error(err);
+      });               
+
 #### Events
   - result = emits when session authenticated with server
     - *result* contains the JSON-formatted result from the server
