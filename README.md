@@ -67,7 +67,12 @@ $ npm install vsphere --save
 
     vc.getMORefsInContainerByType( rootFolder, 'VirtualMachine')
 
-    vc.getMORefsInContainerByTypeAndPropertyArray( rootFolder, 'VirtualMachine', ['name', 'config'])
+    vc.getMORefsInContainerByTypeName( rootFolder, 'VirtualMachine', 'myVM')
+
+    vc.getMORefProperties( MORef )
+    vc.getMORefProperties( MORef, propList )
+
+    vc.getMORefsInContainerByTypePropertyArray( rootFolder, 'VirtualMachine', ['name', 'config'])
 
     vc.getVMinContainerPowerState( rootFolder )
     .once('result', function( result) {

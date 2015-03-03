@@ -89,9 +89,49 @@ describe('Client tests - query commands:', function(){
     });
   });
 
+  it('can retrieve all properties of a specific VirtualMachine object by ManagedObjectReference', {timeout: 20000}, function(done) {
+
+    var rootFolder = vc.serviceContent.rootFolder;
+    vc.getMORefsInContainerByType( rootFolder, 'VirtualMachine')
+    .once('result', function(vmRefsResult) {
+      vc.getMORefProperties( _.sample(vmRefsResult.returnval.objects).obj)
+      .once('result', function(result) {
+        expect(result.returnval.objects.obj.attributes.type).to.equal('VirtualMachine');
+        expect(result.returnval.objects.propSet).to.exist();
+        done();
+      })
+      .once('error', function(err) {
+        console.error(err);
+      });
+    })
+    .once('error', function(err) {
+      console.error(err);
+    });
+  });
+
+  it('can retrieve all properties of a specific VirtualMachine object by ManagedObjectReference derived by name', {timeout: 20000}, function(done) {
+
+    var rootFolder = vc.serviceContent.rootFolder;
+    vc.getMORefsInContainerByTypeName( rootFolder, 'VirtualMachine', _.sample(TestVars.testVMs))
+    .once('result', function( vmRefResult) {
+      vc.getMORefProperties( vmRefResult )
+      .once('result', function(result) {
+        expect(result.returnval.objects.obj.attributes.type).to.equal('VirtualMachine');
+        expect(result.returnval.objects.propSet).to.exist();
+        done();
+      })
+      .once('error', function(err) {
+        console.error(err);
+      });
+    })
+    .once('error', function(err) {
+      console.error(err);
+    });
+  });
+
   it('can obtain the names of all Virtual Machines using getMORefsInContainerByTypeAndPropertyArray', {timeout: 20000}, function(done){
     var rootFolder = vc.serviceContent.rootFolder;
-    vc.getMORefsInContainerByTypeAndPropertyArray( rootFolder, 'VirtualMachine', ['name'])
+    vc.getMORefsInContainerByTypePropertyArray( rootFolder, 'VirtualMachine', ['name'])
     .once('result', function(result) {
       if( _.isEmpty(result) ) {
         // no vms to see
