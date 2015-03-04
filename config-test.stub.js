@@ -9,6 +9,13 @@ var vCenterTestCreds = {
 	'vCenterPassword' : 'vcpw',
 	'vCenter' : true
 };
-
-
 exports.vCenterTestCreds = vCenterTestCreds;
+
+var vCenterTestVars = {
+  testVMs: {
+
+    testVMLinux: 'test-centos-1',
+    testVMWindows: 'test-win2k12-1'
+  }
+};
+exports.vCenterTestVars = vCenterTestVars;
