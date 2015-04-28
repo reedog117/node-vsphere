@@ -1,5 +1,7 @@
 # node-vsphere
 
+[![Join the chat at https://gitter.im/reedog117/node-vsphere](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/reedog117/node-vsphere?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 # This module is not yet finished and still under development!
 
 This is a Node.js module to connect to VMware vCenter servers and/or ESXi hosts and perform operations using the [vSphere Web Services API].
