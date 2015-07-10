@@ -15,14 +15,13 @@
     "url": "https://github.com/reedog117/node-vsphere/issues"
   },
   "dependencies": {
-    "joi": "^5.1.0",
-    "joi-model": "0.0.8",
-    "lodash": "^3.2.0",
+    "joi": "6.x.x",
+    "lodash": "3.x.x",
     "node-vsphere-soap": "^0.0.2-2"
   },
   "devDependencies": {
-    "code": "*",
-    "lab": "*"
+    "code": "1.x.x",
+    "lab": "5.x.x"
   },
   "keywords": [
     "vsphere",
