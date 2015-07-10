@@ -184,7 +184,7 @@ describe('Client tests - VM power operations:', function(){
   it('powers on and off a VM (by name)', {timeout: 60000}, function(done){
 
     // turn off all test vms before running test
-    vc.powerOpVMByName( _.values( TestVars.testVMs), 'powerOff')
+    vc.powerOpVMByName( _.values( TestVars.testVMs), 'shutdown')
     .once('result', runTest)
     .once('error', runTest);
 
@@ -206,7 +206,7 @@ describe('Client tests - VM power operations:', function(){
           // verify VM is powered on
           expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
 
-          vc.powerOpVMByMORef( vmObj, 'powerOff')
+          vc.powerOpVMByMORef( vmObj, 'shutdown')
           .once('result', function(powerOffResult) {
 
             // ensure VM PowerOff task successfully fired
@@ -243,7 +243,7 @@ describe('Client tests - VM power operations:', function(){
 
     // turn off all test VMs
 
-    vc.powerOpVMByName( _.values( TestVars.testVMs), 'powerOff')
+    vc.powerOpVMByName( _.values( TestVars.testVMs), 'shutdown')
     .once('result', runTest)
     .once('error', runTest);
 
@@ -271,7 +271,7 @@ describe('Client tests - VM power operations:', function(){
             // verify all test VMs are powered on
             expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
 
-            vc.powerOpVMByMORef( vmObj, 'powerOff')
+            vc.powerOpVMByMORef( vmObj, 'shutdown')
             .once('result', function(powerOffResult) {
 
               // verify that all submitted PowerOff tasks have successfully fired
