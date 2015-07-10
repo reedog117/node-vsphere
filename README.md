@@ -6,7 +6,7 @@
 
 This is a Node.js module to connect to VMware vCenter servers and/or ESXi hosts and perform operations using the [vSphere Web Services API].
 
-This module is dependent upon [node-vsphere-soap] which handles the low-level SOAP WSDL calls to the vSphere API.
+This module is dependent upon [node-vsphere-soap] which handles the low-level SOAP WSDL calls to the vSphere API.  This module should be referenced in your projects, not node-vsphere-soap, so you can avoid making lower-level calls directly to vSphere Web Services.
 
 This is very much in alpha. 
 
@@ -24,6 +24,10 @@ $ npm install vsphere --save
 ```
 
 ## Sample Code
+
+### examples directory
+
+Check out the examples in that directory, which include how to run power operations on VMs and how to grab the properties of ManagedObjectReferences.
 
 ### To connect to a vCenter server:
 
