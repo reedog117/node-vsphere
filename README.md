@@ -25,14 +25,16 @@ $ npm install vsphere --save
 
 ### To connect to a vCenter server:
 
-    var Vsphere = require('vsphere');
-    var vc = new Vsphere.Client(host, user, password, sslVerify);
-    vc.once('ready', function() {
-      // perform work here
-    });
-    vc.once('error', function(err) {
-      // handle error here
-    });
+```javascript
+var Vsphere = require('vsphere');
+var vc = new Vsphere.Client(host, user, password, sslVerify);
+vc.once('ready', function() {
+  // perform work here
+});
+vc.once('error', function(err) {
+  // handle error here
+});
+```
 
 #### Arguments
   - host = hostname or IP of vCenter/ESX/ESXi server
@@ -55,92 +57,94 @@ $ npm install vsphere --save
 
   There are examples here for now, until more formal documentation is put together
 
-    var vcCmd = vc.runCommand( commandToRun, arguments );
-    vcCmd.once('result', function( result, raw, soapHeader) {
-      // handle results
-    });
-    vcCmd.once('error', function( err) {
-      // handle errors
-    });
+```javascript
+var vcCmd = vc.runCommand( commandToRun, arguments );
+vcCmd.once('result', function( result, raw, soapHeader) {
+  // handle results
+});
+vcCmd.once('error', function( err) {
+  // handle errors
+});
 
-    var rootFolder = vc.serviceContent.rootFolder;
+var rootFolder = vc.serviceContent.rootFolder;
 
-    vc.getMORefsInContainerByType( rootFolder, 'VirtualMachine')
+vc.getMORefsInContainerByType( rootFolder, 'VirtualMachine')
 
-    vc.getMORefsInContainerByTypeName( rootFolder, 'VirtualMachine', 'myVM')
+vc.getMORefsInContainerByTypeName( rootFolder, 'VirtualMachine', 'myVM')
 
-    vc.getMORefProperties( MORef )
-    vc.getMORefProperties( MORef, propList )
+vc.getMORefProperties( MORef )
+vc.getMORefProperties( MORef, propList )
 
-    vc.getMORefsInContainerByTypePropertyArray( rootFolder, 'VirtualMachine', ['name', 'config'])
+vc.getMORefsInContainerByTypePropertyArray( rootFolder, 'VirtualMachine', ['name', 'config'])
 
-    vc.getVMinContainerPowerState( rootFolder )
-    .once('result', function( result) {
-      /*
-      result = [{ obj: { attributes: { type: 'VirtualMachine' }, '$value': '4' },
-                name: 'testvm-win',
-                powerState: 'poweredOff' }, ...]
-      */
-    });
-    .once('error', function( err) {
-      // handle errors
-    });
+vc.getVMinContainerPowerState( rootFolder )
+.once('result', function( result) {
+  /*
+  result = [{ obj: { attributes: { type: 'VirtualMachine' }, '$value': '4' },
+            name: 'testvm-win',
+            powerState: 'poweredOff' }, ...]
+  */
+});
+.once('error', function( err) {
+  // handle errors
+});
 
-    vc.powerOpVMByName( vmName, powerOp)
-    /*
-    vmName can be a string (for a single VM) or an array of strings (for multiple VMs)
-    powerOp is one of ['powerOn', 'powerOff', 'reset', 'standby', 'shutdown', 'reboot', 'suspend']
-    */
+vc.powerOpVMByName( vmName, powerOp)
+/*
+vmName can be a string (for a single VM) or an array of strings (for multiple VMs)
+powerOp is one of ['powerOn', 'powerOff', 'reset', 'standby', 'shutdown', 'reboot', 'suspend']
+*/
 
-    vc.waitForValues( MORef, filterProps, endWaitProps, expectedVals)
-    /*
-    emits result when the specified properties of a ManagedObjectReference 
-    MORef = ManagedObject to monitor
-    filterProps = properties to filter/retrieve from MORef
-    endWaitProps = property to monitor
-    expectedVals = values of property to monitor (endWaitProps) that will trigger command to emit result
-    */
+vc.waitForValues( MORef, filterProps, endWaitProps, expectedVals)
+/*
+emits result when the specified properties of a ManagedObjectReference 
+MORef = ManagedObject to monitor
+filterProps = properties to filter/retrieve from MORef
+endWaitProps = property to monitor
+expectedVals = values of property to monitor (endWaitProps) that will trigger command to emit result
+*/
 
-    /* usage example for powering on and off a VMa VM */
-    vc.powerOpVMByName( _.sample(TestVars.testVMs), 'powerOn')
-      .once('result', function(powerOnResult) {
-        // ensure VM PowerOn task successfully fired
-        expect(powerOnResult[0].result['$value']).to.be.equal('success');
-        // get the Virtual Machine ManagedObjectReference
-        var vmObj = powerOnResult[0].obj;
-        vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOn')
+/* usage example for powering on and off a VMa VM */
+vc.powerOpVMByName( _.sample(TestVars.testVMs), 'powerOn')
+  .once('result', function(powerOnResult) {
+    // ensure VM PowerOn task successfully fired
+    expect(powerOnResult[0].result['$value']).to.be.equal('success');
+    // get the Virtual Machine ManagedObjectReference
+    var vmObj = powerOnResult[0].obj;
+    vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOn')
+    .once('result', function(result) {
+      // verify VM is powered on
+      expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
+
+      // fire powerOff command
+      vc.powerOpVMByMORef( vmObj, 'powerOff')
+      .once('result', function(powerOffResult) {
+
+        // ensure VM PowerOff task successfully fired
+        expect(powerOffResult[0].result['$value']).to.be.equal('success');
+
+        vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOff')
         .once('result', function(result) {
-          // verify VM is powered on
-          expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOn');
-
-          // fire powerOff command
-          vc.powerOpVMByMORef( vmObj, 'powerOff')
-          .once('result', function(powerOffResult) {
-
-            // ensure VM PowerOff task successfully fired
-            expect(powerOffResult[0].result['$value']).to.be.equal('success');
-
-            vc.waitForValues( vmObj, 'summary.runtime.powerState', 'powerState', 'poweredOff')
-            .once('result', function(result) {
-              // verify VM is powered off
-              expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOff');
-              done();
-            })
-            .once('error', function(err) {
-            console.error(err);
-            });         
-          })
-          .once('error', function(err) {
-            console.error(err);
-          });
+          // verify VM is powered off
+          expect(result['summary.runtime.powerState']['$value']).to.be.equal('poweredOff');
+          done();
         })
         .once('error', function(err) {
-          console.error(err);
-        });
+        console.error(err);
+        });         
       })
       .once('error', function(err) {
         console.error(err);
-      });               
+      });
+    })
+    .once('error', function(err) {
+      console.error(err);
+    });
+  })
+  .once('error', function(err) {
+    console.error(err);
+  });
+```               
 
 #### Events
   - result = emits when session authenticated with server
@@ -187,7 +191,6 @@ $ npm test
 
 License
 ----
-
 MIT
 
 
